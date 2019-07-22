@@ -5,10 +5,12 @@ import os
 import numpy as np
 from utils import *
 from model import *
+from tqdm import tqdm
+import os.path as osp
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def train_coord_encoder(path):
+def train_coord_encoder(path, outdir):
     coordenc = CoordinateEncoder().to(device)
     coorddata = CoordinateData()
     if os.path.exists(path):
@@ -18,7 +20,7 @@ def train_coord_encoder(path):
     iter_save = 1e2 # 1e4
     lr = 5e-4
     optimizer = torch.optim.Adam(coordenc.parameters(), lr=lr)
-    for i in range(iter):
+    for i in tqdm(range(iter)):
         points, bitmap = coorddata.nextBatch()
         pred = coordenc.forward(points.to(device))
         loss = MSE(bitmap.to(device), pred).mean() ##### edit
@@ -30,8 +32,8 @@ def train_coord_encoder(path):
             optimizer = torch.optim.Adam(coordenc.parameters(), lr=lr)
             print('Coordinate encoder loss %f at iteration %d'
                 % (loss.cpu().detach().numpy(), i))
-            tensor2Image(pred[0, 0], 'bitmap.bmp')
-            tensor2Image(bitmap[0, 0], 'bitmap_gt.bmp')
+            tensor2Image(pred[0, 0], f"{outdir}/bitmap_{i+1}.bmp")
+            tensor2Image(bitmap[0, 0], f"{outdir}/bitmap_gt_{i+1}.bmp")
             torch.save(coordenc.state_dict(), path)
 
 def train_generator(coordenc_path, gen_path, dataset_path):
@@ -179,7 +181,13 @@ def train_recurrent_agent_mnist(gen_path, agent_path):
             print('\rIteration %d loss %f' % (i, loss.cpu().detach().numpy()), end='')
         torch.save(ra.state_dict(), agent_path)
 
-train_coord_encoder('./model/coordenc.pkl')
-# train_generator('./model/coordenc.pkl', './model/gen.pkl', './dataset/3')
-# train_agent_mnist('./model/gen.pkl', './model/mnist_agent.pkl')
-# train_recurrent_agent_mnist('./model/gen.pkl', './model/recurrent_mnist_agent.pkl')
+if __name__ == '__main__':
+    outdir = 'logs/'
+    outdir = f"{outdir}/coord_encoder"
+    if not osp.exists(outdir):
+        os.makedirs(outdir)
+
+    train_coord_encoder('./model/coordenc.pkl', outdir)
+    # train_generator('./model/coordenc.pkl', './model/gen.pkl', './dataset/3')
+    # train_agent_mnist('./model/gen.pkl', './model/mnist_agent.pkl')
+    # train_recurrent_agent_mnist('./model/gen.pkl', './model/recurrent_mnist_agent.pkl')
