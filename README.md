@@ -25,6 +25,7 @@ https://github.com/hzwer/SARA_DDPG
   cd environment
   npm install
   npm audit fix
+  npm i puppeteer
   ```
 
 
