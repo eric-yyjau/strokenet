@@ -2,6 +2,33 @@
 Check out this work, neural renderer + RL works better
 https://github.com/hzwer/SARA_DDPG
 
+## Requirements
+- npm
+  - mac
+  ```
+  brew install node
+  ```
+  - ubuntu
+  ```
+  
+  ```
+
+## Run training
+ ```
+ mkdir model
+ ```
+- Train coord_encoder
+
+- Train generator
+  - Generate data
+  ```
+  cd environment
+  npm install
+  npm audit fix
+  ```
+
+
+## Results
 A neural network that learns to draw digits by strokes  
 The environment relies on node.js and puppeteer  
 Needs tweaking to get it work  
